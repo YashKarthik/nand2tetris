@@ -7,9 +7,16 @@
  * if (a and b) out = 1, else out = 0 
  */
 CHIP And {
-    IN a, b;
-    OUT out;
-    
-    PARTS:
-    //// Replace this comment with your code.
+  IN a, b;
+  OUT out;
+  
+  PARTS:
+  /**
+    * AND = xy
+    * NAND = (xy)'
+    * xy = ((xy)')'
+    *    = (not (nand x y))
+    */
+  Nand(a=a, b=b, out=out1);
+  Not(in=out1, out=out);
 }

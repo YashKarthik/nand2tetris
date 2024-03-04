@@ -20,5 +20,12 @@ CHIP Mux8Way16 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    /**
+     * Two 4-1 muxes in the first layer
+     * With a 2-1 mux to select between the two
+     */
+    Mux4Way16(a=a, b=b, c=c, d=d, sel=sel[0..1], out=m1);
+    Mux4Way16(a=e, b=f, c=g, d=h, sel=sel[0..1], out=m2);
+
+    Mux16(a=m1, b=m2, sel=sel[2], out=out);
 }

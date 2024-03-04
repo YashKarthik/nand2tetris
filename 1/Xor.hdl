@@ -11,5 +11,15 @@ CHIP Xor {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    /**
+     * XOR: 1 when x != y
+     * = xy' + x'y
+     */
+    Not(in=a, out=notA);
+    Not(in=b, out=notB);
+
+    And(a=a, b=notB, out=m1);
+    And(a=notA, b=b, out=m2);
+
+    Or(a=m1, b=m2, out=out);
 }
