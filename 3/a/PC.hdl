@@ -5,14 +5,25 @@
 /**
  * A 16-bit counter.
  * if      reset(t): out(t+1) = 0
- * else if load(t):  out(t+1) = in(t)
- * else if inc(t):   out(t+1) = out(t) + 1
- * else              out(t+1) = out(t)
+ *   else if load(t):  out(t+1) = in(t)
+ *     else if inc(t):   out(t+1) = out(t) + 1
+ *       else              out(t+1) = out(t)
  */
 CHIP PC {
     IN in[16],inc, load, reset;
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+
+    Mux16(a=prevStage, b=false, sel=reset, out=inReg);
+    Mux16(a=prevprevStage, b=in, sel=load, out=prevStage);
+    Mux16(a=outReg, b=incred, sel=inc, out=prevprevStage);
+
+    Inc16(in=outReg, out=incred);
+
+    Or(a=inc, b=load, out=or1);
+    Or(a=reset, b=or1, out=or2);
+
+    Register(in=inReg, load=or2, out=outReg);
+    Or16(a=outReg, b=outReg, out=out);
 }
