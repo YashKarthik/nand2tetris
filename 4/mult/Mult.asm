@@ -7,4 +7,42 @@
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 // The algorithm is based on repetitive addition.
 
-//// Replace this comment with your code.
+  @i
+  M=0
+  @res
+  M=0
+
+  @R2
+  M=0
+
+(LOOP)
+  // Jump to @END if R1 - i == 0
+  @i
+  D=M
+  @R1
+  D=M-D
+  @END
+  D;JEQ
+
+  // Fetch res, add R1 to it, store it back in res
+  @res
+  D=M
+  @R0
+  D=D+M
+  @res
+  M=D
+
+  @i
+  M=M+1
+  @LOOP
+  0; JMP
+
+(END)
+  // Load result from @res, store it in D, then transfer result to R2
+  @res
+  D=M
+  @R2
+  M=D
+
+  @END
+  0;JMP
