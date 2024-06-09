@@ -19,7 +19,6 @@
  * their new values only in the next cycle.
  */
 CHIP CPU {
-
     IN  inM[16],         // M value input  (M = contents of RAM[A])
         instruction[16], // Instruction for execution
         reset;           // Signals whether to re-start the current
@@ -32,5 +31,38 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-	//// Replace this comment with your code.
+    ARegister(in=inA, load=loadA, out=outA);
+    DRegister(in=outALU, load=instruction[4], out=outD);
+
+    //Mux16(a=nextPC, b=false, sel=reset, out[0..15]=pc);
+
+    Mux16(a=outA, b=inM, sel=instruction[12], out=AorM);
+    ALU(
+      x=outD,
+      y=AorM,
+      zx=instruction[11],
+      nx=instruction[10],
+      zy=instruction[9],
+      ny=instruction[8],
+      f=instruction[7],
+      no=instruction[6],
+      out=outALU,
+      zr=zr,
+      ng=ng
+    );
+
+    Or16(a=false, b=outALU, out=outM);
+    Or(a=false, b=instruction[3], out=writeM);
+
+    Mux4Way16(
+      a[0..14]=instruction[0..14],
+      a[15]=false,
+      b=false,
+      c=outALU,
+      d=outALU,
+      sel[0]=instruction[15], // A instruction
+      sel[1]=instruction[5],   // A destination
+      out=inA
+    );
+    Or(a=instruction[15], b=instruction[5], out=loadA);
 }
