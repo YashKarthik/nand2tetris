@@ -32,8 +32,10 @@ CHIP CPU {
 
     PARTS:
     ARegister(in=inA, load=loadA, out=outA);
-    DRegister(in=outALU, load=instruction[4], out=outD);
+    DRegister(in=outALU, load=loadD, out=outD);
     PC(in=outA, inc=true, load=jump, reset=reset, out[0..14]=pc);
+
+    And(a=instruction[4], b=instruction[15], out=loadD);
 
     Mux16(a=outA, b=inM, sel=instruction[12], out=AorM);
     ALU(
