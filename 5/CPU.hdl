@@ -33,6 +33,7 @@ CHIP CPU {
     PARTS:
     ARegister(in=inA, load=loadA, out=outA);
     DRegister(in=outALU, load=instruction[4], out=outD);
+    PC(in=outA, inc=true, load=jump, reset=reset, out[0..14]=pc);
 
     Mux16(a=outA, b=inM, sel=instruction[12], out=AorM);
     ALU(
@@ -51,19 +52,19 @@ CHIP CPU {
 
     Or16(a=false, b=outA, out[0..14]=addressM);
     Or16(a=false, b=outALU, out=outM);
-    Or(a=false, b=instruction[3], out=writeM);
+    And(a=instruction[15], b=instruction[3], out=writeM);
 
+    Not(in=instruction[15], out=LA);
     Mux4Way16(
-      a[0..14]=instruction[0..14],
-      a[15]=false,
-      b=false,
+      a=false,
+      b[0..14]=instruction[0..14],
       c=outALU,
-      d=outALU,
-      sel[0]=instruction[15], // A instruction
-      sel[1]=instruction[5],   // A destination
+      d[0..14]=instruction[0..14],
+      sel[0]=LA,                   // A instruction
+      sel[1]=instruction[5],       // A destination
       out=inA
     );
-    Or(a=instruction[15], b=instruction[5], out=loadA);
+    Or(a=LA, b=instruction[5], out=loadA);
 
     And(a=outZr, b=instruction[1], out=j2);
     And(a=outNg, b=instruction[2], out=j1);
@@ -72,25 +73,23 @@ CHIP CPU {
     And(a=noz, b=instruction[0], out=j3);
 
     Or8Way(in[0]=j1, in[1]=j2, in[2]=j3, out=shouldJump);
-    Or8Way(
-      in[0]=instruction[0],
-      in[1]=instruction[1],
-      in[2]=instruction[2],
+
+    And(
+      a=instruction[0],
+      b=instruction[1],
+      out=uncondJump1
+    );
+    And(
+      a=instruction[1],
+      b=instruction[2],
+      out=uncondJump2
+    );
+    And(
+      a=uncondJump1,
+      b=uncondJump2,
       out=uncondJump
     );
-    Or(a=shouldJump, b=uncondJump, out=jump);
 
-    Mux16(
-      a=true,
-      b=outA,
-      sel=jump,
-      out[0..14]=nextPC
-    );
-    Mux16(
-      a[0..14]=nextPC,
-      b=false,
-      sel=reset,
-      out[0..14]=pc
-    );
-
+    Or(a=shouldJump, b=uncondJump, out=j);
+    And(a=j, b=instruction[15], out=jump);
 }
